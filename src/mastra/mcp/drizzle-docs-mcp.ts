@@ -445,6 +445,11 @@ const searchDocsTool = createTool({
   },
   execute: async ({ query, limit = 10 }: { query: string; limit?: number }) => {
     try {
+      // Initialize cache if not done yet
+      if (docMetadataCache.size === 0) {
+        await initializeDocumentationCache();
+      }
+
       // Build or use cached Fuse index
       if (!fuseIndex) {
         // Fall back to current cache
@@ -513,9 +518,4 @@ export const drizzleDocsMcpServer = new MCPServer({
     fetchPage: fetchPageTool,
     searchDocs: searchDocsTool,
   },
-});
-
-// Initialize documentation cache on server startup
-initializeDocumentationCache().catch((error) => {
-  console.error("Failed to initialize documentation cache:", error);
 });

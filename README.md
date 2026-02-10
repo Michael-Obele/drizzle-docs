@@ -1,10 +1,9 @@
 # drizzle-docs-mcp
 
-<!-- [![latest release](https://img.shields.io/github/v/tag/Michael-Obele/drizzle-docs?sort=semver)](https://github.com/Michael-Obele/drizzle-docs/releases) -->
-
+[![latest release](https://img.shields.io/github/v/tag/Michael-Obele/drizzle-docs?sort=semver)](https://github.com/Michael-Obele/drizzle-docs/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-<!-- [![Install MCP Server](https://cursor.com/deeplink/mcp-install-light.svg)](https://cursor.com/en-US/install-mcp?name=drizzle-docs&config=eyJ0eXBlIjoic3NlIiwidXJsIjoiaHR0cHM6Ly9kcml6emxlLm1hc3RyYS5jbG91ZC9hcGkvbWNwL2RyaXp6bGUtZG9jcy1tY3Avc3NlIn0%3D) -->
+[![Install MCP Server](https://cursor.com/deeplink/mcp-install-light.svg)](https://cursor.com/en-US/install-mcp?name=drizzle-docs-mcp&config=eyJjb21tYW5kIjoibnB4IC15IG1jcC1yZW1vdGUgaHR0cHM6Ly9kcml6emxlLm1hc3RyYS5jbG91ZC9hcGkvbWNwL2RyaXp6bGUtZG9jcy1tY3AvbWNwIn0%3D)
 
 Mastra MCP server and tooling that provides real-time access to all Drizzle ORM documentation pages with fuzzy search, pre-caching, and flexible content retrieval.
 
@@ -12,9 +11,9 @@ Mastra MCP server and tooling that provides real-time access to all Drizzle ORM 
 
 Choose the base host that fits your workflow — both expose the same toolset, but their runtime characteristics differ:
 
-| Host         | Base URL                       | Highlights                                                                                           |
-| ------------ | ------------------------------ | ---------------------------------------------------------------------------------------------------- |
-| Mastra Cloud | https://drizzle.mastra.cloud   | **Primary choice** - Zero cold start, maximum responsiveness, and consistently reliable performance. |
+| Host         | Base URL                     | Highlights                                                                                           |
+| ------------ | ---------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Mastra Cloud | https://drizzle.mastra.cloud | **Primary choice** - Zero cold start, maximum responsiveness, and consistently reliable performance. |
 
 - Append `/api/mcp/drizzle-docs-mcp/sse` for the SSE transport (best for editors that keep long-lived connections).
 - Append `/api/mcp/drizzle-docs-mcp/mcp` for the HTTP transport (handy for CLIs and quick one-off calls).
@@ -189,3 +188,9 @@ This project is licensed under the [MIT License](LICENSE).
 ## Contributing
 
 We welcome contributions! Please read our [Contributing Guidelines](CONTRIBUTING.md) and [Code of Conduct](CODE_OF_CONDUCT.md) before getting started.
+
+## Contact
+
+- **Issues & Support**: support@svelte-apps.me
+- **Contributions**: contrib@svelte-apps.me
+- **Maintainer**: Michael Amachree (michael@svelte-apps.me)

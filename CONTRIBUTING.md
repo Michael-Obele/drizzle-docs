@@ -38,4 +38,4 @@ We welcome ideas for new features or improvements. Please open an issue to discu
 By participating in this project, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Questions?
-If you have any questions, please reach out to `support@svelte-apps.me`.
+If you have any questions, please reach out to `contrib@svelte-apps.me`.

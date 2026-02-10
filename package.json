@@ -1,5 +1,6 @@
 {
   "name": "drizzle-docs-mcp",
+  "version": "2.0.0",
   "module": "index.ts",
   "type": "module",
   "private": true,
@@ -22,7 +23,9 @@
     "build": "mastra build",
     "start": "mastra start",
     "mcp": "tsgo --ignoreConfig index.ts",
-    "check": "tsgo --noEmit"
+    "check": "tsgo --noEmit",
+    "sync-versions": "bun run ./scripts/sync-versions.ts",
+    "sync-versions-auto": "bun run ./scripts/sync-versions.ts --auto"
   },
   "dependencies": {
     "@mastra/core": "^1.2.0",

@@ -48,7 +48,7 @@ export function registerListTopics(server: McpServer<any>): void {
       name: "list_topics",
       title: "List Drizzle docs topics",
       description:
-        "Browse the Drizzle ORM documentation catalogue (source: /llms.txt — about 450 pages). Call it with NO arguments first to get the map: every SQL dialect, every section, and how many pages each one holds. Then add `dialect` (pg, mysql, sqlite, mssql, cockroach, singlestore) and/or `section` (for example \"Migrations\", \"Access your data\", \"Validations\") to list the pages inside that slice — page the result with `limit`/`offset`. Each topic has a `slug` (like \"docs/pg/select\") to pass to fetch_page.",
+        'Browse the Drizzle ORM documentation catalogue (source: /llms.txt — about 450 pages). Call it with NO arguments first to get the map: every SQL dialect, every section, and how many pages each one holds. Then add `dialect` (pg, mysql, sqlite, mssql, cockroach, singlestore) and/or `section` (for example "Migrations", "Access your data", "Validations") to list the pages inside that slice — page the result with `limit`/`offset`. Each topic has a `slug` (like "docs/pg/select") to pass to fetch_page.',
       schema,
       annotations: {
         readOnlyHint: true,

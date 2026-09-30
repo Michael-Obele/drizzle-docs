@@ -7,14 +7,14 @@ standards), and the entrypoint decides whether it speaks **stdio** or
 
 ## Layers
 
-| Layer | File | Responsibility |
-| --- | --- | --- |
-| Config | `src/lib/config.ts` | Every knob, read from the environment (`DOCS_BASE_URL`, cache TTL, transport, port, host, path) |
-| Data | `src/lib/docs.ts` | The `llms.txt` catalogue, page fetching + HTML→Markdown, the `llms-full.txt` corpus, caching, the dialect fallback |
-| Search | `src/lib/search.ts` | Fuse.js indexes for the fast (title/section) and deep (content) search, plus snippet extraction |
-| Tools | `src/tools/*.ts` | The three MCP tools and their zod schemas |
-| Server | `src/server.ts` | Builds the `McpServer`, sets capabilities/instructions, registers the tools |
-| Transport | `src/index.ts` | Picks stdio or HTTP, serves `/` info + health, warms the catalogue |
+| Layer     | File                | Responsibility                                                                                                     |
+| --------- | ------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Config    | `src/lib/config.ts` | Every knob, read from the environment (`DOCS_BASE_URL`, cache TTL, transport, port, host, path)                    |
+| Data      | `src/lib/docs.ts`   | The `llms.txt` catalogue, page fetching + HTML→Markdown, the `llms-full.txt` corpus, caching, the dialect fallback |
+| Search    | `src/lib/search.ts` | Fuse.js indexes for the fast (title/section) and deep (content) search, plus snippet extraction                    |
+| Tools     | `src/tools/*.ts`    | The three MCP tools and their zod schemas                                                                          |
+| Server    | `src/server.ts`     | Builds the `McpServer`, sets capabilities/instructions, registers the tools                                        |
+| Transport | `src/index.ts`      | Picks stdio or HTTP, serves `/` info + health, warms the catalogue                                                 |
 
 ```mermaid
 flowchart TD
@@ -49,7 +49,7 @@ flowchart TD
 
 ## The catalogue quirk (why some links need a second try)
 
-Drizzle lists shared pages under *every* dialect section — `## pg/meet drizzle`
+Drizzle lists shared pages under _every_ dialect section — `## pg/meet drizzle`
 points at `/docs/pg/overview` — but the site only serves the unprefixed path.
 Auditing all 446 catalogue links against the live site:
 
@@ -77,10 +77,10 @@ that actually works from then on.
 
 ## Transports
 
-| Mode | Start | Endpoint |
-| --- | --- | --- |
-| stdio (default) | `npx drizzle-docs-mcp` | stdin/stdout — logs go to **stderr**, because stdout is the protocol |
-| HTTP | `drizzle-docs-mcp --http` or `MCP_TRANSPORT=http` | `POST/GET/DELETE` on `/mcp` (`MCP_PATH`), plus `/` for info/health |
+| Mode            | Start                                             | Endpoint                                                             |
+| --------------- | ------------------------------------------------- | -------------------------------------------------------------------- |
+| stdio (default) | `npx drizzle-docs-mcp`                            | stdin/stdout — logs go to **stderr**, because stdout is the protocol |
+| HTTP            | `drizzle-docs-mcp --http` or `MCP_TRANSPORT=http` | `POST/GET/DELETE` on `/mcp` (`MCP_PATH`), plus `/` for info/health   |
 
 The HTTP transport is configured with `cors: true` and `allowedOrigins: true`
 (this is a public, read-only docs server); swap both for an origin list if you

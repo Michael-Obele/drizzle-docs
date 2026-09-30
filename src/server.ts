@@ -29,11 +29,11 @@ const INSTRUCTIONS = [
   "Nothing here writes, changes or executes anything — every answer comes from the live docs.",
   "",
   "Typical flow:",
-  "1. search_docs to find the page: depth \"index\" when you just need the right page, depth \"full\" when you need the actual content (it returns a snippet).",
+  '1. search_docs to find the page: depth "index" when you just need the right page, depth "full" when you need the actual content (it returns a snippet).',
   "2. fetch_page with that slug to read the whole page as Markdown (use `sections`/`maxLength` to keep it small).",
   "3. list_topics when the user asks what documentation exists — no arguments gives the dialect + section map, a `dialect`/`section` gives the pages in it.",
   "",
-  "Slugs look like \"docs/pg/select\". Dialects: pg, mysql, sqlite, mssql, cockroach, singlestore.",
+  'Slugs look like "docs/pg/select". Dialects: pg, mysql, sqlite, mssql, cockroach, singlestore.',
 ].join("\n");
 
 /**

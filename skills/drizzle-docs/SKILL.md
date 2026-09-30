@@ -24,7 +24,13 @@ bunx drizzle-docs-mcp
 ```
 
 ```json
-{ "drizzle-docs": { "type": "stdio", "command": "npx", "args": ["-y", "drizzle-docs-mcp"] } }
+{
+  "drizzle-docs": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "drizzle-docs-mcp"]
+  }
+}
 ```
 
 Self-hosted remote endpoint (Streamable HTTP):
@@ -37,11 +43,11 @@ docker run --rm -p 3000:3000 drizzle-docs-mcp
 
 ## The three tools
 
-| Tool | Use it when | Key arguments |
-| --- | --- | --- |
-| `list_topics` | "what docs exist for X?" | no args → the whole map (dialects, sections, counts); `dialect`, `section`, `limit`, `offset` → the pages in that slice |
-| `search_docs` | "which page answers this?" | `query`, `depth` (`"index"` fast / `"full"` content search with snippets), `dialect`, `section`, `limit` |
-| `fetch_page` | "show me the page" | `slug` (or full URL), `sections`, `maxLength`, `format`, `fresh` |
+| Tool          | Use it when                | Key arguments                                                                                                           |
+| ------------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `list_topics` | "what docs exist for X?"   | no args → the whole map (dialects, sections, counts); `dialect`, `section`, `limit`, `offset` → the pages in that slice |
+| `search_docs` | "which page answers this?" | `query`, `depth` (`"index"` fast / `"full"` content search with snippets), `dialect`, `section`, `limit`                |
+| `fetch_page`  | "show me the page"         | `slug` (or full URL), `sections`, `maxLength`, `format`, `fresh`                                                        |
 
 All three return JSON text (`fetch_page` returns raw Markdown by default).
 
@@ -72,13 +78,13 @@ All three return JSON text (`fetch_page` returns raw Markdown by default).
 
 ## Configuration (all optional)
 
-| Env var | Default | Meaning |
-| --- | --- | --- |
-| `DOCS_BASE_URL` | `https://orm.drizzle.team` | Docs site (or a mirror) to read |
-| `DOCS_CACHE_TTL_MS` | `3600000` | Cache lifetime |
-| `MCP_TRANSPORT` | `stdio` | `stdio` or `http` (`--http` also works) |
-| `PORT` / `HOST` | `3000` / `0.0.0.0` | HTTP listener |
-| `MCP_PATH` | `/mcp` | HTTP MCP endpoint path |
+| Env var             | Default                    | Meaning                                 |
+| ------------------- | -------------------------- | --------------------------------------- |
+| `DOCS_BASE_URL`     | `https://orm.drizzle.team` | Docs site (or a mirror) to read         |
+| `DOCS_CACHE_TTL_MS` | `3600000`                  | Cache lifetime                          |
+| `MCP_TRANSPORT`     | `stdio`                    | `stdio` or `http` (`--http` also works) |
+| `PORT` / `HOST`     | `3000` / `0.0.0.0`         | HTTP listener                           |
+| `MCP_PATH`          | `/mcp`                     | HTTP MCP endpoint path                  |
 
 Full setup, editor configs and publishing notes: the project README at
 <https://github.com/Michael-Obele/drizzle-docs>.

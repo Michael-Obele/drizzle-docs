@@ -207,7 +207,9 @@ async function scrapeSidebar(): Promise<DocIndex> {
     if (!href.startsWith("/docs/") && !href.startsWith("#")) return;
     links.push({
       title,
-      url: href.startsWith("#") ? `${config.baseUrl}/docs/overview${href}` : `${config.baseUrl}${href}`,
+      url: href.startsWith("#")
+        ? `${config.baseUrl}/docs/overview${href}`
+        : `${config.baseUrl}${href}`,
       order: Number.parseInt(link.attr("data-nav-index") ?? "-1", 10),
     });
   });

@@ -40,7 +40,7 @@ Or add it to your editor's MCP config:
 <details>
 <summary>Cursor / Windsurf / VS Code / Claude Code / Zed</summary>
 
-**Cursor** — Settings → MCP → *Add new MCP server*:
+**Cursor** — Settings → MCP → _Add new MCP server_:
 
 ```json
 {
@@ -66,7 +66,11 @@ Or add it to your editor's MCP config:
 ```json
 {
   "servers": {
-    "drizzle-docs": { "type": "stdio", "command": "npx", "args": ["-y", "drizzle-docs-mcp"] }
+    "drizzle-docs": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "drizzle-docs-mcp"]
+    }
   }
 }
 ```
@@ -80,7 +84,13 @@ claude mcp add drizzle-docs -- npx -y drizzle-docs-mcp
 **Zed** — `~/.config/zed/settings.json`:
 
 ```json
-{ "context_servers": { "drizzle-docs": { "command": { "path": "npx", "args": ["-y", "drizzle-docs-mcp"] } } } }
+{
+  "context_servers": {
+    "drizzle-docs": {
+      "command": { "path": "npx", "args": ["-y", "drizzle-docs-mcp"] }
+    }
+  }
+}
 ```
 
 </details>
@@ -124,15 +134,15 @@ stdio locally and HTTP remotely.
 
 ## Tools
 
-| Tool | What it does | Arguments |
-| --- | --- | --- |
-| `list_topics` | Browse the catalogue. No arguments returns the map: every dialect, every section, page counts. | `dialect`, `section`, `limit` (60), `offset` |
-| `search_docs` | Find a page, or the answer inside the pages. | `query`, `depth` (`index` \| `full`), `dialect`, `section`, `limit` (10) |
-| `fetch_page` | Read one page as clean Markdown (nav, sidebars and footers stripped). | `slug`, `sections`, `maxLength`, `format` (`markdown` \| `json` \| `plaintext`), `fresh` |
+| Tool          | What it does                                                                                   | Arguments                                                                                |
+| ------------- | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `list_topics` | Browse the catalogue. No arguments returns the map: every dialect, every section, page counts. | `dialect`, `section`, `limit` (60), `offset`                                             |
+| `search_docs` | Find a page, or the answer inside the pages.                                                   | `query`, `depth` (`index` \| `full`), `dialect`, `section`, `limit` (10)                 |
+| `fetch_page`  | Read one page as clean Markdown (nav, sidebars and footers stripped).                          | `slug`, `sections`, `maxLength`, `format` (`markdown` \| `json` \| `plaintext`), `fresh` |
 
 - **`depth: "index"`** (default) fuzzy-searches titles, slugs and sections
   straight from `llms.txt` — instant, and it tolerates typos (`migraton`
-  finds *Migrations*).
+  finds _Migrations_).
 - **`depth: "full"`** downloads `llms-full.txt` once (a few MB) and searches
   the actual page text, returning a `snippet` around each match. Use it when
   you need the answer, not a link.
@@ -149,7 +159,7 @@ Ask your assistant things like:
 
 ## Skills
 
-The repo ships an agent skill that teaches your assistant *how* to use these
+The repo ships an agent skill that teaches your assistant _how_ to use these
 tools (when to use which one, and the gotchas above). Install it:
 
 ```bash
@@ -190,7 +200,14 @@ docshark stale                                     # refresh anything >14 days o
 Add it to your MCP config:
 
 ```json
-{ "mcpServers": { "docshark": { "command": "bunx", "args": ["-y", "docshark", "start", "--stdio"] } } }
+{
+  "mcpServers": {
+    "docshark": {
+      "command": "bunx",
+      "args": ["-y", "docshark", "start", "--stdio"]
+    }
+  }
+}
 ```
 
 Its agent skills are one command away too:
@@ -208,14 +225,14 @@ answers, DocShark for everything else you index. See
 
 All optional — defaults work out of the box.
 
-| Env var | Default | Meaning |
-| --- | --- | --- |
-| `DOCS_BASE_URL` | `https://orm.drizzle.team` | Docs site (or your own mirror) to read |
-| `DOCS_CACHE_TTL_MS` | `3600000` | How long a page/index stays cached (1 h) |
-| `MCP_TRANSPORT` | `stdio` | `stdio` or `http` (same as `--http`) |
-| `PORT` | `3000` | HTTP port |
-| `HOST` | `0.0.0.0` | HTTP bind address |
-| `MCP_PATH` | `/mcp` | HTTP MCP endpoint path |
+| Env var             | Default                    | Meaning                                  |
+| ------------------- | -------------------------- | ---------------------------------------- |
+| `DOCS_BASE_URL`     | `https://orm.drizzle.team` | Docs site (or your own mirror) to read   |
+| `DOCS_CACHE_TTL_MS` | `3600000`                  | How long a page/index stays cached (1 h) |
+| `MCP_TRANSPORT`     | `stdio`                    | `stdio` or `http` (same as `--http`)     |
+| `PORT`              | `3000`                     | HTTP port                                |
+| `HOST`              | `0.0.0.0`                  | HTTP bind address                        |
+| `MCP_PATH`          | `/mcp`                     | HTTP MCP endpoint path                   |
 
 ## Local development
 

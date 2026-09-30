@@ -123,8 +123,12 @@ describe("search", () => {
 
   test("filterEntries narrows by dialect and section", () => {
     expect(filterEntries(index.entries, "pg")).toHaveLength(2);
-    expect(filterEntries(index.entries, undefined, "migrations")).toHaveLength(2);
-    expect(filterEntries(index.entries, "sqlite", "migrations")).toHaveLength(0);
+    expect(filterEntries(index.entries, undefined, "migrations")).toHaveLength(
+      2,
+    );
+    expect(filterEntries(index.entries, "sqlite", "migrations")).toHaveLength(
+      0,
+    );
   });
 
   test("searchEntries tolerates typos", () => {

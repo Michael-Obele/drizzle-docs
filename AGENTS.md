@@ -35,17 +35,17 @@ bun run build      # emit dist/ (what npm ships)
 
 ## Project structure
 
-| Path | What lives there |
-| --- | --- |
-| `src/lib/config.ts` | All configuration, read from env |
-| `src/lib/docs.ts` | `llms.txt` catalogue, page fetch + Markdown conversion, `llms-full.txt` corpus, caching, dialect fallback |
-| `src/lib/search.ts` | Fuse.js indexes (fast + full-text) and snippet extraction |
-| `src/tools/` | The three tools; `result.ts` holds the response helpers |
-| `src/server.ts` | `McpServer` assembly, capabilities, instructions |
-| `src/index.ts` | Transport selection (stdio / HTTP) |
-| `tests/` | `bun test` suites — offline fixtures only |
-| `skills/drizzle-docs/SKILL.md` | The user-facing agent skill (source of truth) |
-| `dist/` | Build output, git-ignored — never edit |
+| Path                           | What lives there                                                                                          |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| `src/lib/config.ts`            | All configuration, read from env                                                                          |
+| `src/lib/docs.ts`              | `llms.txt` catalogue, page fetch + Markdown conversion, `llms-full.txt` corpus, caching, dialect fallback |
+| `src/lib/search.ts`            | Fuse.js indexes (fast + full-text) and snippet extraction                                                 |
+| `src/tools/`                   | The three tools; `result.ts` holds the response helpers                                                   |
+| `src/server.ts`                | `McpServer` assembly, capabilities, instructions                                                          |
+| `src/index.ts`                 | Transport selection (stdio / HTTP)                                                                        |
+| `tests/`                       | `bun test` suites — offline fixtures only                                                                 |
+| `skills/drizzle-docs/SKILL.md` | The user-facing agent skill (source of truth)                                                             |
+| `dist/`                        | Build output, git-ignored — never edit                                                                    |
 
 ## Conventions
 
@@ -53,7 +53,7 @@ bun run build      # emit dist/ (what npm ships)
   imports carry the `.js` extension even though the file is `.ts`.
 - **Adding a tool**: create a module-level `zod` schema, then register it with
   `server.tool<typeof schema>({ name, title, description, schema, annotations },
-  handler)`. The explicit type argument is required — tmcp's `McpServer` generic
+handler)`. The explicit type argument is required — tmcp's `McpServer` generic
   is the adapter's schema type, so inference alone fails. Return
   `json(...)` / `text(...)` / `fail(...)` from `src/tools/result.ts`; never
   throw, MCP wants `isError: true`.
@@ -64,7 +64,7 @@ bun run build      # emit dist/ (what npm ships)
 - **No new dependencies** without asking — `tmcp`, `zod`, `cheerio`, `fuse.js`,
   `turndown`, `srvx` are the set.
 - **Skills**: `skills/<name>/SKILL.md` is the single copy; `.agents/skills/`,
-  `.agent/skills/` and `.windsurf/skills/` hold *relative symlinks* to it. Never
+  `.agent/skills/` and `.windsurf/skills/` hold _relative symlinks_ to it. Never
   duplicate skill content across those folders.
 - **Docs tone**: plain, simple words. No hype, no clever phrasing.
 

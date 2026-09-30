@@ -1,193 +1,268 @@
 # drizzle-docs-mcp
 
 [![latest release](https://img.shields.io/github/v/tag/Michael-Obele/drizzle-docs?sort=semver)](https://github.com/Michael-Obele/drizzle-docs/releases)
+[![npm version](https://img.shields.io/npm/v/drizzle-docs-mcp.svg)](https://www.npmjs.com/package/drizzle-docs-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-[![Install MCP Server](https://cursor.com/deeplink/mcp-install-light.svg)](https://cursor.com/en-US/install-mcp?name=drizzle-docs-mcp&config=eyJjb21tYW5kIjoibnB4IC15IG1jcC1yZW1vdGUgaHR0cHM6Ly9kcml6emxlLm1hc3RyYS5jbG91ZC9hcGkvbWNwL2RyaXp6bGUtZG9jcy1tY3AvbWNwIn0%3D)
+An MCP server that gives your AI assistant the whole Drizzle ORM documentation:
+**446 pages across 6 SQL dialects**, with typo-tolerant search and full-text
+search, served as clean Markdown.
 
-Mastra MCP server and tooling that provides real-time access to all Drizzle ORM documentation pages with fuzzy search, pre-caching, and flexible content retrieval.
+- Built on [`tmcp`](https://tmcp.io) — no framework baggage, just tools.
+- Two ways to run it: **npm** (`npx drizzle-docs-mcp`, stdio) and **https**
+  (Streamable HTTP, host it yourself with Docker or plain Node/Bun).
+- Reads `orm.drizzle.team/llms.txt` for the catalogue and `llms-full.txt` for
+  content search, so it follows the real docs structure instead of scraping a
+  sidebar and guessing.
 
-## Production Deployments
+## Connect
 
-Choose the base host that fits your workflow — both expose the same toolset, but their runtime characteristics differ:
+### 1. npm (stdio) — nothing to install
 
-| Host         | Base URL                     | Highlights                                                                                           |
-| ------------ | ---------------------------- | ---------------------------------------------------------------------------------------------------- |
-| Mastra Cloud | https://drizzle.mastra.cloud | **Primary choice** - Zero cold start, maximum responsiveness, and consistently reliable performance. |
-
-- Append `/api/mcp/drizzle-docs-mcp/sse` for the SSE transport (best for editors that keep long-lived connections).
-- Append `/api/mcp/drizzle-docs-mcp/mcp` for the HTTP transport (handy for CLIs and quick one-off calls).
-- **Mastra Cloud is the recommended primary deployment** - it offers zero cold start and maximum responsiveness.
-
-<details>
-<summary>Endpoint reference & alternates</summary>
-
-- **Mastra Cloud SSE**: https://drizzle.mastra.cloud/api/mcp/drizzle-docs-mcp/sse
-- **Mastra Cloud HTTP**: https://drizzle.mastra.cloud/api/mcp/drizzle-docs-mcp/mcp
-
-</details>
-
-> [!NOTE]
-> This project follows our [Code of Conduct](CODE_OF_CONDUCT.md) and welcomes contributions! See our [Contributing Guidelines](CONTRIBUTING.md) for details.
-
-This repository contains a Mastra-based MCP server that provides real-time access to Drizzle ORM documentation using a hybrid of pre-caching and live fuzzy search. Use it in your AI-powered code editor to get instant access to the latest Drizzle ORM patterns directly from the official docs.
-
-## Table of Contents
-
-- [Production Deployments](#production-deployments)
-- [Features](#-features)
-- [Drizzle Ecosystem Integration](#drizzle-ecosystem-integration)
-- [Observations & Minor UX Suggestions](#-observations--minor-ux-suggestions)
-- [Editor Setup](#editor-setup)
-- [CLI & Agent Configuration](#cli--agent-configuration)
-- [Verification & Quick Tests](#verification--quick-tests)
-- [Available Tools](#available-tools)
-- [Example Usage](#example-usage)
-- [Local Development](#local-development)
-- [Developer Scripts](#developer-scripts)
-- [MCP Architecture](#mcp-architecture)
-- [Project Architecture](#project-architecture)
-- [Contributing](#contributing)
-- [License](#license)
-
-## 🎉 Features
-
-- ✅ Production deployment on Mastra Cloud
-- ✅ **Three main MCP tools** for comprehensive Drizzle ORM support (see 'Available Tools')
-- ✅ **Smart Fuzzy Search**: Powered by `fuse.js`, allowing for typos and partial matches.
-- ✅ **Pre-caching**: Automatically fetches and indexes all 97 documentation pages at startup.
-- ✅ **Flexible Content Retrieval**: Fetch full pages or specific sections in Markdown, JSON, or Plaintext.
-- ✅ Support for all major AI code editors (Cursor, Windsurf, VS Code, Zed, Claude Code, Codex)
-- ✅ HTTP and SSE transport protocols
-- ✅ Real-time web scraping from `orm.drizzle.team`
-
-## Drizzle Ecosystem Integration
-
-Drizzle ORM is more than just an ORM; it's a "Headless TypeScript ORM with a Head." This MCP server provides access to the entire ecosystem:
-
-- **Drizzle Kit**: CLI for migrations, introspection, and Studio.
-- **Drizzle Relations (RQB)**: Best-in-class relational query builder.
-- **Validation Libraries**: First-class support for `zod`, `valibot`, `typebox`, and `arktype`.
-- **Serverless/Edge Ready**: Specific patterns for Turso, Neon, PlanetScale, and Cloudflare D1.
-
-## 🔧 Observations & Suggestions
-
-- The `search_docs` tool uses high-sensitivity fuzzy matching; if you get too many irrelevant results, try making your query more specific (e.g., "relational queries" instead of just "queries"). ✅
-- Content is cached for performance, but the server will fetch fresh data if it detects significant upstream changes or if restarted. 💡
-- The `fetch_page` tool allows for section-level extraction, which is highly recommended for keeping AI context windows clean.
-
-## Editor Setup
-
-**Mastra Cloud is the recommended primary deployment** for all editors. It offers zero cold start and maximum responsiveness. VS Code users can open the Command Palette (`Cmd/Ctrl+Shift+P`) and run `MCP: Add server` to paste the URL.
-
-<details>
-<summary>Cursor</summary>
-
-1. Open Cursor Settings (`Cmd/Ctrl` + `,`).
-2. Navigate to "MCP" / "Model Context Protocol".
-3. **Mastra Cloud is recommended**. Append the SSE path as shown:
-
-```json
-{
-  "drizzle-docs": {
-    "type": "sse",
-    "url": "https://drizzle.mastra.cloud/api/mcp/drizzle-docs-mcp/sse"
-  }
-}
+```bash
+npx -y drizzle-docs-mcp        # Node
+bunx drizzle-docs-mcp          # Bun
 ```
 
-</details>
-
-<details>
-<summary>Windsurf</summary>
-
-1. Edit `~/.codeium/windsurf/mcp_config.json`.
-2. Add the SSE transport as shown:
+Or add it to your editor's MCP config:
 
 ```json
 {
   "mcpServers": {
     "drizzle-docs": {
-      "url": "https://drizzle.mastra.cloud/api/mcp/drizzle-docs-mcp/sse",
-      "transport": "sse"
+      "command": "npx",
+      "args": ["-y", "drizzle-docs-mcp"]
     }
   }
 }
 ```
 
-</details>
-
 <details>
-<summary>VS Code</summary>
+<summary>Cursor / Windsurf / VS Code / Claude Code / Zed</summary>
 
-Run `MCP: Add Server` (Ctrl/Cmd+Shift+P) and paste the URL:
+**Cursor** — Settings → MCP → *Add new MCP server*:
 
-- SSE: `https://drizzle.mastra.cloud/api/mcp/drizzle-docs-mcp/sse`
+```json
+{
+  "drizzle-docs": {
+    "command": "npx",
+    "args": ["-y", "drizzle-docs-mcp"]
+  }
+}
+```
+
+**Windsurf** — `~/.codeium/windsurf/mcp_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "drizzle-docs": { "command": "npx", "args": ["-y", "drizzle-docs-mcp"] }
+  }
+}
+```
+
+**VS Code (Copilot)** — `.vscode/mcp.json` or the `MCP: Add Server` command:
+
+```json
+{
+  "servers": {
+    "drizzle-docs": { "type": "stdio", "command": "npx", "args": ["-y", "drizzle-docs-mcp"] }
+  }
+}
+```
+
+**Claude Code**
+
+```bash
+claude mcp add drizzle-docs -- npx -y drizzle-docs-mcp
+```
+
+**Zed** — `~/.config/zed/settings.json`:
+
+```json
+{ "context_servers": { "drizzle-docs": { "command": { "path": "npx", "args": ["-y", "drizzle-docs-mcp"] } } } }
+```
 
 </details>
 
-## Available Tools
+### 2. https (Streamable HTTP) — host it yourself
 
-Once installed, your AI assistant will have access to these tools:
-
-1. `list_topics` — Discover all 97 available Drizzle ORM documentation pages. Use this to understand the structure or find specific topic slugs.
-2. `fetch_page` — Fetch and convert documentation pages to Markdown with optional filtering (slug, format, sections, maxLength).
-3. `search_docs` — Search the documentation using intelligent fuzzy matching (query, limit).
-
-## Example Usage
-
-Ask your AI assistant:
-
-- "Show me how to setup a Postgres schema in Drizzle"
-- "List all Drizzle docs topics"
-- "Search for relational query examples in Drizzle"
-- "How do I handle migrations with Drizzle Kit?"
-- "Compare Drizzle select vs relational query builders"
-
-## Local Development
-
-### Quick start
-
-1. Install dependencies:
+The same server can listen on a port. Set `MCP_TRANSPORT=http` (or pass
+`--http`) and the MCP endpoint is served at `/mcp`:
 
 ```bash
-bun install
+docker build -t drizzle-docs-mcp .
+docker run --rm -p 3000:3000 drizzle-docs-mcp
+curl http://localhost:3000/        # {"name":"drizzle-docs-mcp","version":"3.0.0",…}
 ```
 
-2. Start development server (Mastra Studio):
+Without Docker:
 
 ```bash
-bun run dev
+bun install && bun run build
+node dist/index.js --http          # PORT, HOST, MCP_PATH come from the env
 ```
 
-3. Build for production:
+Then point a client at it:
+
+```json
+{
+  "mcpServers": {
+    "drizzle-docs": { "type": "http", "url": "https://<your-host>/mcp" }
+  }
+}
+```
+
+Runs on Node 22+ or Bun, so any container platform, VM or PaaS works —
+`tmcp` speaks plain Web `Request`/`Response`, which is why the same code serves
+stdio locally and HTTP remotely.
+
+> [!NOTE]
+> v2 ran on Mastra Cloud (`drizzle.mastra.cloud`). That endpoint is retired —
+> use `npx` for local use, or self-host for a shared URL. See
+> [CHANGELOG.md](CHANGELOG.md).
+
+## Tools
+
+| Tool | What it does | Arguments |
+| --- | --- | --- |
+| `list_topics` | Browse the catalogue. No arguments returns the map: every dialect, every section, page counts. | `dialect`, `section`, `limit` (60), `offset` |
+| `search_docs` | Find a page, or the answer inside the pages. | `query`, `depth` (`index` \| `full`), `dialect`, `section`, `limit` (10) |
+| `fetch_page` | Read one page as clean Markdown (nav, sidebars and footers stripped). | `slug`, `sections`, `maxLength`, `format` (`markdown` \| `json` \| `plaintext`), `fresh` |
+
+- **`depth: "index"`** (default) fuzzy-searches titles, slugs and sections
+  straight from `llms.txt` — instant, and it tolerates typos (`migraton`
+  finds *Migrations*).
+- **`depth: "full"`** downloads `llms-full.txt` once (a few MB) and searches
+  the actual page text, returning a `snippet` around each match. Use it when
+  you need the answer, not a link.
+- Slugs look like `docs/pg/select`. Some catalogue links point at pages the
+  site serves without the dialect segment (`/docs/pg/overview` →
+  `/docs/overview`) — `fetch_page` retries the unprefixed URL and repairs the
+  catalogue, so you never have to care.
+
+Ask your assistant things like:
+
+- "How do I set up a Postgres schema in Drizzle?"
+- "Which migration pages exist for SQLite?"
+- "Show me the batch API examples" → `search_docs { query: "batch api", depth: "full" }`
+
+## Skills
+
+The repo ships an agent skill that teaches your assistant *how* to use these
+tools (when to use which one, and the gotchas above). Install it:
 
 ```bash
-bun run build
+# From the skills registry (same pattern as DocShark)
+npx skills add Michael-Obele/drizzle-docs --skill drizzle-docs
 ```
 
-## Developer Scripts
+Or by hand into the standard skill folder:
 
-- `npm run dev` - Start Mastra Studio at localhost:4111.
-- `npm run build` - Bundle the production-ready application.
-- `npm run mcp` - Run the MCP server locally with TS support.
-- `npm run check` - Verify TypeScript compilation.
+```bash
+mkdir -p ~/.agents/skills/drizzle-docs
+curl -fsSL https://raw.githubusercontent.com/Michael-Obele/drizzle-docs/master/skills/drizzle-docs/SKILL.md \
+  -o ~/.agents/skills/drizzle-docs/SKILL.md
+```
 
-## Project Architecture
+- GitHub Copilot and OpenCode read `~/.agents/skills/` automatically.
+- Claude Code: `ln -s ../../.agents/skills/drizzle-docs ~/.claude/skills/drizzle-docs`
+- In this repo the skill lives in `skills/drizzle-docs/` and is symlinked into
+  `.agents/`, `.agent/` and `.windsurf/`, so every supported editor picks it up
+  from a clone.
 
-- **Mastra Framework**: Orchestrates the MCP server and tools.
-- **Smart Caching**: Pre-fetches docs on startup to ensure instant search results.
-- **Turndown Service**: Convers HTML content into clean, AI-optimized Markdown.
-- **Fuse.js**: Handles typo-tolerant search across slugs and titles.
-- **Detailed Explanation**: See [`MCP_ARCHITECTURE.md`](MCP_ARCHITECTURE.md).
+## Also: DocShark
 
-## License
+This server answers one site — Drizzle's. If you work across many
+documentation sites, use **[DocShark](https://github.com/Michael-Obele/docshark)**
+(our own docs MCP, also built on `tmcp`): it crawls any docs site, stores it in
+SQLite with FTS5/BM25 search, and lets your assistant query the latest pages.
 
-This project is licensed under the [MIT License](LICENSE).
+```bash
+bun add -g docshark
+
+docshark add https://orm.drizzle.team/ --depth 2   # index a site
+docshark search "relational queries"               # CLI search
+docshark list                                      # what is indexed
+docshark stale                                     # refresh anything >14 days old
+```
+
+Add it to your MCP config:
+
+```json
+{ "mcpServers": { "docshark": { "command": "bunx", "args": ["-y", "docshark", "start", "--stdio"] } } }
+```
+
+Its agent skills are one command away too:
+
+```bash
+npx skills add Michael-Obele/docshark --skill docshark
+npx skills add Michael-Obele/docshark --skill using-docshark
+```
+
+Use them together: `drizzle-docs-mcp` for instant, always-fresh Drizzle
+answers, DocShark for everything else you index. See
+[DocShark on GitHub →](https://github.com/Michael-Obele/docshark).
+
+## Configuration
+
+All optional — defaults work out of the box.
+
+| Env var | Default | Meaning |
+| --- | --- | --- |
+| `DOCS_BASE_URL` | `https://orm.drizzle.team` | Docs site (or your own mirror) to read |
+| `DOCS_CACHE_TTL_MS` | `3600000` | How long a page/index stays cached (1 h) |
+| `MCP_TRANSPORT` | `stdio` | `stdio` or `http` (same as `--http`) |
+| `PORT` | `3000` | HTTP port |
+| `HOST` | `0.0.0.0` | HTTP bind address |
+| `MCP_PATH` | `/mcp` | HTTP MCP endpoint path |
+
+## Local development
+
+```bash
+bun install          # dependencies
+bun run dev          # stdio, watch mode
+bun run dev:http     # HTTP on :3000/mcp
+bun run check        # tsc --noEmit
+bun test             # parser + search tests (offline fixtures)
+bun run build        # emit dist/ (this is what npm ships)
+```
+
+## Publishing a release
+
+One push of a version tag runs `.github/workflows/release.yml`, which
+typechecks, tests, builds, then publishes to npm and cuts a GitHub release:
+
+```bash
+# 1. bump "version" in package.json
+bun run build        # sanity check locally
+git commit -am "chore: release vX.Y.Z"
+git tag vX.Y.Z && git push origin vX.Y.Z
+```
+
+The workflow refuses to publish if the tag does not match `package.json`, and
+`prepublishOnly` re-runs `check` + `test` + `build` before `npm publish`
+(provenance enabled). Requires one secret: `NPM_TOKEN`.
+
+## Architecture
+
+- [`MCP_ARCHITECTURE.md`](MCP_ARCHITECTURE.md) — how the server, the data layer
+  and the transports fit together.
+- `src/lib/docs.ts` — catalogue (`llms.txt`), page fetching + Markdown
+  conversion, full corpus (`llms-full.txt`), caching.
+- `src/lib/search.ts` — Fuse.js indexes for the fast and the deep search.
+- `src/tools/` — the three tools.
+- `src/server.ts` + `src/index.ts` — server assembly and transport selection.
 
 ## Contributing
 
-We welcome contributions! Please read our [Contributing Guidelines](CONTRIBUTING.md) and [Code of Conduct](CODE_OF_CONDUCT.md) before getting started.
+Read the [Contributing Guidelines](CONTRIBUTING.md) and
+[Code of Conduct](CODE_OF_CONDUCT.md) first. Issues and security reports go to
+[Security](SECURITY.md).
+
+## License
+
+[MIT](LICENSE)
 
 ## Contact
 

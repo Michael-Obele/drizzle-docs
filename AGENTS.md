@@ -1,78 +1,83 @@
 # AGENTS.md
 
-This document provides guidance for AI coding agents working in this repository.
+Guidance for AI coding agents working in this repository.
 
-## Project Overview
+## What this is
 
-This is a **Mastra** project written in TypeScript. Mastra is a framework for building AI-powered applications and agents with a modern TypeScript stack.
+A TypeScript **MCP server** for the Drizzle ORM documentation, built on
+[`tmcp`](https://tmcp.io). Three tools (`list_topics`, `search_docs`,
+`fetch_page`), two transports (stdio and Streamable HTTP), published to npm as
+`drizzle-docs-mcp`.
+
+> v1/v2 used Mastra. It was removed in v3 — do not add Mastra code, deps,
+> scripts or docs back.
 
 ## Commands
 
-Use these commands to interact with the project.
-
-### Installation
+**Bun only.** Never run or document `npm` / `pnpm` / `yarn` commands here.
 
 ```bash
-npm install
+bun install        # dependencies
+bun run dev        # MCP over stdio, watch mode
+bun run dev:http   # MCP over HTTP at localhost:3000/mcp
+bun run check      # tsc --noEmit — run this after every edit
+bun test           # tests (offline fixtures, no network)
+bun run build      # emit dist/ (what npm ships)
 ```
 
-### Development
+### Dev servers and builds — ask first
 
-Start the Mastra Studio at localhost:4111 by running the `dev` script:
+- Do **not** start `bun run dev`, `bun run dev:http`, a Docker container or any
+  other long-running server on your own initiative: ask which server/port the
+  environment is already using, then use that.
+- Do **not** run a build or a publish unless the task needs it — ask first.
+- `bun run check` and `bun test` are always safe and expected.
+
+## Project structure
+
+| Path | What lives there |
+| --- | --- |
+| `src/lib/config.ts` | All configuration, read from env |
+| `src/lib/docs.ts` | `llms.txt` catalogue, page fetch + Markdown conversion, `llms-full.txt` corpus, caching, dialect fallback |
+| `src/lib/search.ts` | Fuse.js indexes (fast + full-text) and snippet extraction |
+| `src/tools/` | The three tools; `result.ts` holds the response helpers |
+| `src/server.ts` | `McpServer` assembly, capabilities, instructions |
+| `src/index.ts` | Transport selection (stdio / HTTP) |
+| `tests/` | `bun test` suites — offline fixtures only |
+| `skills/drizzle-docs/SKILL.md` | The user-facing agent skill (source of truth) |
+| `dist/` | Build output, git-ignored — never edit |
+
+## Conventions
+
+- **TypeScript strict**, ES modules, `moduleResolution: NodeNext`: relative
+  imports carry the `.js` extension even though the file is `.ts`.
+- **Adding a tool**: create a module-level `zod` schema, then register it with
+  `server.tool<typeof schema>({ name, title, description, schema, annotations },
+  handler)`. The explicit type argument is required — tmcp's `McpServer` generic
+  is the adapter's schema type, so inference alone fails. Return
+  `json(...)` / `text(...)` / `fail(...)` from `src/tools/result.ts`; never
+  throw, MCP wants `isError: true`.
+- **Tool descriptions are the UX**: they are what the model reads. Say what the
+  tool does, when to reach for it, and what a good argument looks like.
+- **Configuration over hardcoding**: hosts, paths and lists belong in
+  `src/lib/config.ts` behind an env var with a bundled default.
+- **No new dependencies** without asking — `tmcp`, `zod`, `cheerio`, `fuse.js`,
+  `turndown`, `srvx` are the set.
+- **Skills**: `skills/<name>/SKILL.md` is the single copy; `.agents/skills/`,
+  `.agent/skills/` and `.windsurf/skills/` hold *relative symlinks* to it. Never
+  duplicate skill content across those folders.
+- **Docs tone**: plain, simple words. No hype, no clever phrasing.
+
+## Verification before you say "done"
 
 ```bash
-npm run dev
+bun run check && bun test
 ```
 
-### Build
+Add a test for anything new in `src/lib/` (parsers, search, fallbacks). Only run
+`bun run build` when the change has to ship, and ask first.
 
-In order to build a production-ready server, run the `build` script:
+## Skills in this repo
 
-```bash
-npm run build
-```
-
-## Project Structure
-
-Folders organize your agent's resources, like agents, tools, and workflows.
-
-| Folder                 | Description                                                                                                                              |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/mastra`           | Entry point for all Mastra-related code and configuration.                                                                               |
-| `src/mastra/agents`    | Define and configure your agents - their behavior, goals, and tools.                                                                     |
-| `src/mastra/workflows` | Define multi-step workflows that orchestrate agents and tools together.                                                                  |
-| `src/mastra/tools`     | Create reusable tools that your agents can call                                                                                          |
-| `src/mastra/mcp`       | (Optional) Implement custom MCP servers to share your tools with external agents                                                         |
-| `src/mastra/scorers`   | (Optional) Define scorers for evaluating agent performance over time                                                                     |
-| `src/mastra/public`    | (Optional) Contents are copied into the `.build/output` directory during the build process, making them available for serving at runtime |
-
-### Top-level files
-
-Top-level files define how your Mastra project is configured, built, and connected to its environment.
-
-| File                  | Description                                                                                                       |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `src/mastra/index.ts` | Central entry point where you configure and initialize Mastra.                                                    |
-| `.env.example`        | Template for environment variables - copy and rename to `.env` to add your secret [model provider](/models) keys. |
-| `package.json`        | Defines project metadata, dependencies, and available npm scripts.                                                |
-| `tsconfig.json`       | Configures TypeScript options such as path aliases, compiler settings, and build output.                          |
-
-## Mastra Skills
-
-Skills are modular capabilities that extend agent functionalities. They provide pre-built tools, integrations, and workflows that agents can leverage to accomplish tasks more effectively.
-
-This project has skills installed for the following agents:
-
-- Opencode
-- Windsurf
-- Github Copilot
-- Gemini Cli
-
-### Using Skills
-
-Skills are automatically available to agents in your project once installed. Agents can access and use these skills without additional configuration.
-
-## Resources
-
-- [Mastra Documentation](https://mastra.ai/llms.txt)
-- [Mastra .well-known skills discovery](https://mastra.ai/.well-known/skills/index.json)
+- **drizzle-docs** — how to use this server's own tools. Symlinked into
+  `.agents/skills/`, `.agent/skills/` and `.windsurf/skills/`.

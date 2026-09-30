@@ -258,8 +258,47 @@ git tag vX.Y.Z && git push origin vX.Y.Z
 ```
 
 The workflow refuses to publish if the tag does not match `package.json`, and
-`prepublishOnly` re-runs `check` + `test` + `build` before `npm publish`
-(provenance enabled). Requires one secret: `NPM_TOKEN`.
+`prepublishOnly` re-runs `check` + `test` + `build` before `npm publish`.
+
+### npm provenance
+
+Every release is published with a [provenance
+attestation](https://docs.npmjs.com/generating-provenance-statements/): the
+tarball is tied to this public repository through GitHub's OIDC identity and
+signed by Sigstore, so anyone can verify where it was built.
+
+The workflow already does its half: `permissions: id-token: write` on the
+publish job, a GitHub-hosted runner, `npm publish --provenance --access public`
+(plus `publishConfig.provenance` in `package.json`, so a publish that forgets
+the flag still gets one). `package.json` carries the matching public
+`repository` field — npm checks that case-sensitively.
+
+One-time setup on [npmjs.com](https://www.npmjs.com):
+
+1. **First publish needs a token.** The package does not exist yet, and a
+   trusted publisher can only be configured on an *existing* package. Create a
+   [granular access token](https://docs.npmjs.com/creating-and-viewing-access-tokens)
+   with *Read and write → publish* for `drizzle-docs-mcp`, then add it as the
+   repository secret **`NPM_TOKEN`**. Your account needs 2FA enabled — npm
+   requires it for publishing by default.
+2. **Then switch to trusted publishing (no token).** npmjs.com → Packages →
+   `drizzle-docs-mcp` → Settings → **Trusted Publisher** → GitHub Actions →
+   org/user `Michael-Obele`, repository `drizzle-docs`, workflow file
+   `release.yml`. In **Allowed actions**, tick `npm publish` too — new
+   connections default to `npm stage publish` only, which our workflow does not
+   use. From the next release npm mints provenance itself, so you can delete
+   the `NPM_TOKEN` secret (the workflow already copes with it being absent).
+3. **Lock it down.** Settings → **Publishing access** → *Require two-factor
+   authentication and disallow tokens*, then revoke the token from step 1.
+
+Check a published version:
+
+```bash
+npm view drizzle-docs-mcp dist.attestations   # Sigstore attestation link
+npm audit signatures                          # verify attestations locally
+```
+
+The package page on npmjs.com shows the provenance badge.
 
 ## Architecture
 

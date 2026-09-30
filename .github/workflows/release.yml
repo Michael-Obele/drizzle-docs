@@ -1,13 +1,14 @@
 name: Release
 
 # Push a `v*` tag to ship: the same build is verified once, then published to
-# npm and attached to a GitHub release.
+# npm with a provenance attestation and attached to a GitHub release.
 #
 #   bun version 3.0.0   # package.json
 #   git tag v3.0.0 && git push origin v3.0.0
 #
-# Requires one repo secret: NPM_TOKEN (automation token, or use provenance
-# with a granular token that has publish rights for drizzle-docs-mcp).
+# npm side (one-time): NPM_TOKEN secret for the first publish, then a Trusted
+# Publisher on npmjs.com so later releases authenticate through GitHub OIDC
+# instead of a long-lived token. See README -> "npm provenance".
 
 on:
   push:
@@ -71,10 +72,13 @@ jobs:
           bun-version: latest
 
       - name: Setup Node (npm registry auth)
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: 22
+          # Node 24 ships npm 11+, which is what mints the OIDC token for
+          # trusted publishing (provenance itself needs npm >= 9.5).
+          node-version: "24"
           registry-url: https://registry.npmjs.org
+          package-manager-cache: false
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
@@ -87,8 +91,23 @@ jobs:
 
       # prepublishOnly re-runs check + test + build (bun is installed above),
       # so a package is never published from an unverified tree.
-      - name: npm publish
-        run: npm publish --access public --provenance
+      #
+      # Two auth modes, both publishing WITH provenance
+      # (`permissions: id-token: write` above is what mints the OIDC token):
+      #
+      #  - NPM_TOKEN set   -> token auth. Required for the FIRST publish: a
+      #    trusted publisher can only be configured on an existing package.
+      #  - NPM_TOKEN empty -> OIDC trusted publishing. Configure it on
+      #    npmjs.com: package -> Settings -> Trusted Publisher -> GitHub
+      #    Actions -> Michael-Obele / drizzle-docs / release.yml, and allow
+      #    `npm publish` (new connections default to `npm stage publish` only).
+      #    npm then generates the provenance attestation by itself.
+      - name: npm publish (provenance)
+        run: |
+          if [ -z "${NODE_AUTH_TOKEN:-}" ]; then
+            npm config delete //registry.npmjs.org/:_authToken --location=user || true
+          fi
+          npm publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

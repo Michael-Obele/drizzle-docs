@@ -1,0 +1,15 @@
+.git
+.github
+.vscode
+.agent
+.agents
+.windsurf
+node_modules
+dist
+tests
+skills
+*.md
+.env
+.env.*
+!.env.example
+*.log

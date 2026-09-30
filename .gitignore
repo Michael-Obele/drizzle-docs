@@ -35,7 +35,6 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 output.txt
 node_modules
 dist
-.mastra
 .env.development
 .env
 *.db

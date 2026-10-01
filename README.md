@@ -262,7 +262,7 @@ The workflow refuses to publish if the tag does not match `package.json`, and
 
 ### npm provenance
 
-Every release from #2 on ships with a [provenance
+Every release from `3.0.1` on ships with a [provenance
 attestation](https://docs.npmjs.com/generating-provenance-statements/): the
 tarball is tied to this public repository through GitHub's OIDC identity and
 signed by Sigstore, so anyone can check where it was built. **No npm token is
@@ -273,11 +273,21 @@ a GitHub-hosted runner, `npm publish --provenance --access public` — and
 `package.json` carries the matching public `repository` field, which npm checks
 case-sensitively.
 
-Setup runs in this order. The order matters: npm refuses to trust a workflow for
-a package that does not exist yet (`npm trust`: *"Package must exist"*), which is
-why release #1 is done by hand.
+#### Why there is a step that deletes a token
+
+`actions/setup-node` with `registry-url` writes
+`//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}` into the runner's
+`.npmrc`. Trusted publishing deliberately has no `NODE_AUTH_TOKEN`, so that
+placeholder expands to an empty string — and npm reads an empty token as *auth
+is configured*, which stops it from starting the OIDC exchange. The publish
+then fails with `ENEEDAUTH` even though the trusted publisher is set up
+perfectly. The `Drop the placeholder token` step deletes the line so OIDC can
+take over. Leave it in; removing it looks like a cleanup but breaks releases.
 
 #### 1. First publish — a login, not a token
+
+`3.0.0` was published by hand, because npm refuses to trust a workflow for a
+package that does not exist yet (`npm trust`: *"Package must exist"*):
 
 ```bash
 npm login                 # browser + 2FA: a session, not a token
@@ -285,7 +295,7 @@ npm publish --access public   # prepublishOnly runs check + test + build
 npm logout                # leave no credential on disk
 ```
 
-This one version carries **no provenance** — attestations can only be minted in
+That one version carries **no provenance** — attestations can only be minted in
 CI, and CI cannot be trusted for a package that does not exist yet.
 
 #### 2. Trust the workflow (still no token)
@@ -312,12 +322,12 @@ disallow tokens*. Only the trusted publisher can publish after that.
 #### 4. Release
 
 ```bash
+bun version patch         # 3.0.1 -> 3.0.2
 git tag vX.Y.Z && git push origin vX.Y.Z
 ```
 
 npm authenticates the job through OIDC and generates the provenance attestation
-by itself. There is no `NPM_TOKEN` secret to manage — the workflow only keeps a
-dormant fallback branch in case one is ever added.
+by itself.
 
 Check a published version:
 

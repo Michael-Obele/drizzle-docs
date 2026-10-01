@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.1] - 2026-10-01
+
+First release through npm trusted publishing.
+
+### Changed
+
+- **Releases now authenticate through GitHub OIDC instead of a stored npm token.** The package lists this repository's `release.yml` as a trusted publisher, so the publish job exchanges its `id-token: write` for a short-lived token and npm mints the provenance attestation itself. `3.0.1` is the first version to ship with an attestation.
+- `publishConfig.provenance` is back on, so a publish that forgets `--provenance` still gets one.
+
+### Fixed
+
+- The publish job no longer trips over the placeholder token `actions/setup-node` writes when given a `registry-url`. With no `NODE_AUTH_TOKEN` secret it expanded to an empty string, npm treated that as "auth configured", skipped the OIDC exchange, and the release failed with `ENEEDAUTH`.
+
 ## [3.0.0] - 2026-09-30
 
 Migrated from Mastra to [`tmcp`](https://tmcp.io) and started publishing to npm.

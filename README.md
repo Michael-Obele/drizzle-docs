@@ -287,9 +287,3 @@ Read the [Contributing Guidelines](CONTRIBUTING.md) and
 ## License
 
 [MIT](LICENSE)
-
-## Contact
-
-- **Issues & Support**: support@svelte-apps.me
-- **Contributions**: contrib@svelte-apps.me
-- **Maintainer**: Michael Amachree (michael@svelte-apps.me)

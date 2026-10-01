@@ -4,7 +4,7 @@
 [![npm version](https://img.shields.io/npm/v/drizzle-docs-mcp.svg)](https://www.npmjs.com/package/drizzle-docs-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Your assistant writes Drizzle code from memory. Memory is out of date, so you
+Your AI writes Drizzle code from memory. Memory is out of date, so you
 get code that looks right and doesn't run — a `where` clause that was renamed
 two versions ago, an import that moved, a Postgres trick that only works on
 SQLite.
@@ -21,7 +21,7 @@ That's the whole install. No API key, no account, nothing to configure.
 
 ## What you get
 
-Three tools your assistant can call:
+Three tools your AI can call:
 
 | Tool          | What it does                                                                                   | Arguments                                                                                |
 | ------------- | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
@@ -168,7 +168,7 @@ the same code serves stdio locally and HTTP remotely.
 
 ## Skills
 
-The repo ships an agent skill that teaches your assistant _how_ to use these
+The repo ships an agent skill that teaches your AI _how_ to use these
 tools (when to use which one, and the gotchas above). Install it:
 
 ```bash
@@ -195,7 +195,7 @@ curl -fsSL https://raw.githubusercontent.com/Michael-Obele/drizzle-docs/master/s
 This server answers one site — Drizzle's. If you work across many
 documentation sites, use **[DocShark](https://github.com/Michael-Obele/docshark)**
 (our own docs MCP, also built on `tmcp`): it crawls any docs site, stores it in
-SQLite with FTS5/BM25 search, and lets your assistant query the latest pages.
+SQLite with FTS5/BM25 search, and lets your AI query the latest pages.
 
 ```bash
 bun add -g docshark

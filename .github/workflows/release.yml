@@ -6,9 +6,9 @@ name: Release
 #   bun version 3.0.0   # package.json
 #   git tag v3.0.0 && git push origin v3.0.0
 #
-# npm side (one-time): NPM_TOKEN secret for the first publish, then a Trusted
-# Publisher on npmjs.com so later releases authenticate through GitHub OIDC
-# instead of a long-lived token. See README -> "npm provenance".
+# No npm token: the publish job authenticates through GitHub OIDC, which npm
+# only accepts once the package lists this workflow as a trusted publisher.
+# One-time setup lives in README -> "npm provenance".
 
 on:
   push:
@@ -92,24 +92,13 @@ jobs:
       # prepublishOnly re-runs check + test + build (bun is installed above),
       # so a package is never published from an unverified tree.
       #
-      # Two auth modes, both publishing WITH provenance
-      # (`permissions: id-token: write` above is what mints the OIDC token):
-      #
-      #  - NPM_TOKEN set   -> token auth. Required for the FIRST publish: a
-      #    trusted publisher can only be configured on an existing package.
-      #  - NPM_TOKEN empty -> OIDC trusted publishing. Configure it on
-      #    npmjs.com: package -> Settings -> Trusted Publisher -> GitHub
-      #    Actions -> Michael-Obele / drizzle-docs / release.yml, and allow
-      #    `npm publish` (new connections default to `npm stage publish` only).
-      #    npm then generates the provenance attestation by itself.
+      # No npm token anywhere: npm detects the GitHub OIDC environment, swaps
+      # this job's id-token for a short-lived publish token through the
+      # package's trusted publisher config (npmjs.com, or
+      # `npm trust github ... --allow-publish`), and mints the provenance
+      # attestation itself.
       - name: npm publish (provenance)
-        run: |
-          if [ -z "${NODE_AUTH_TOKEN:-}" ]; then
-            npm config delete //registry.npmjs.org/:_authToken --location=user || true
-          fi
-          npm publish --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public --provenance
 
   github-release:
     name: GitHub release

@@ -1,6 +1,6 @@
 {
   "name": "drizzle-docs-mcp",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "MCP server for the Drizzle ORM documentation: 450+ pages across 6 SQL dialects with fuzzy and full-text search, over stdio (npx) or Streamable HTTP (self-hosted).",
   "type": "module",
   "license": "MIT",

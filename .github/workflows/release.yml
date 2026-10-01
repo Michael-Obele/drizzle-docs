@@ -71,27 +71,13 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Setup Node (npm registry auth)
+      - name: Setup Node (for npm)
         uses: actions/setup-node@v7
         with:
-          # Node 24 ships npm 11+, which is what mints the OIDC token for
-          # trusted publishing (provenance itself needs npm >= 9.5).
+          # Node 24 ships npm 11.5.1+, which is what performs the OIDC token
+          # exchange for trusted publishing.
           node-version: "24"
-          registry-url: https://registry.npmjs.org
           package-manager-cache: false
-
-      # `setup-node` with `registry-url` writes an `_authToken` line to the
-      # runner's .npmrc. There is no NODE_AUTH_TOKEN secret here, so the
-      # placeholder expands to an empty string — and npm reads an empty token
-      # as "auth is configured", which stops it from starting the OIDC
-      # exchange. The publish then fails with ENEEDAUTH (or E404) even though
-      # the trusted publisher is set up correctly. Deleting the line is what
-      # lets trusted publishing take over.
-      - name: Drop the placeholder token so OIDC can authenticate
-        run: |
-          npmrc="${NPM_CONFIG_USERCONFIG:-$HOME/.npmrc}"
-          sed -i '/_authToken/d' "$npmrc"
-          cat "$npmrc"
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
@@ -105,11 +91,9 @@ jobs:
       # prepublishOnly re-runs check + test + build (bun is installed above),
       # so a package is never published from an unverified tree.
       #
-      # No npm token anywhere: npm detects the GitHub OIDC environment, swaps
-      # this job's id-token for a short-lived publish token through the
-      # package's trusted publisher config (npmjs.com, or
-      # `npm trust github ... --allow-publish`), and mints the provenance
-      # attestation itself.
+      # No npm token: npm sees the GitHub OIDC environment, exchanges this
+      # job's id-token for a short-lived publish token through the package's
+      # trusted publisher config, and mints the provenance attestation itself.
       - name: npm publish (provenance)
         run: npm publish --access public --provenance
 

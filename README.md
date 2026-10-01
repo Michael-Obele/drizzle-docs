@@ -4,16 +4,50 @@
 [![npm version](https://img.shields.io/npm/v/drizzle-docs-mcp.svg)](https://www.npmjs.com/package/drizzle-docs-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-An MCP server that gives your AI assistant the whole Drizzle ORM documentation:
-**446 pages across 6 SQL dialects**, with typo-tolerant search and full-text
-search, served as clean Markdown.
+Your assistant writes Drizzle code from memory. Memory is out of date, so you
+get code that looks right and doesn't run — a `where` clause that was renamed
+two versions ago, an import that moved, a Postgres trick that only works on
+SQLite.
 
-- Built on [`tmcp`](https://tmcp.io) — no framework baggage, just tools.
-- Two ways to run it: **npm** (`npx drizzle-docs-mcp`, stdio) and **https**
-  (Streamable HTTP, host it yourself with Docker or plain Node/Bun).
-- Reads `orm.drizzle.team/llms.txt` for the catalogue and `llms-full.txt` for
-  content search, so it follows the real docs structure instead of scraping a
-  sidebar and guessing.
+This gives it the real thing instead. **446 pages across 6 SQL dialects**,
+read straight from `orm.drizzle.team` and served as clean Markdown — so the
+answer comes from today's docs, not from a training set.
+
+```bash
+npx -y drizzle-docs-mcp
+```
+
+That's the whole install. No API key, no account, nothing to configure.
+
+## What you get
+
+Three tools your assistant can call:
+
+| Tool          | What it does                                                                                   | Arguments                                                                                |
+| ------------- | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `list_topics` | Browse the catalogue. No arguments returns the map: every dialect, every section, page counts. | `dialect`, `section`, `limit` (60), `offset`                                             |
+| `search_docs` | Find a page, or the answer inside the pages.                                                   | `query`, `depth` (`index` \| `full`), `dialect`, `section`, `limit` (10)                 |
+| `fetch_page`  | Read one page as clean Markdown (nav, sidebars and footers stripped).                          | `slug`, `sections`, `maxLength`, `format` (`markdown` \| `json` \| `plaintext`), `fresh` |
+
+- **`depth: "index"`** (default) fuzzy-searches titles, slugs and sections
+  straight from `llms.txt` — instant, and it tolerates typos (`migraton`
+  finds _Migrations_).
+- **`depth: "full"`** downloads `llms-full.txt` once (a few MB) and searches
+  the actual page text, returning a `snippet` around each match. Use it when
+  you need the answer, not a link.
+- Slugs look like `docs/pg/select`. Some catalogue links point at pages the
+  site serves without the dialect segment (`/docs/pg/overview` →
+  `/docs/overview`) — `fetch_page` retries the unprefixed URL and repairs the
+  catalogue, so you never have to care.
+
+Ask it things like:
+
+- "How do I set up a Postgres schema in Drizzle?"
+- "Which migration pages exist for SQLite?"
+- "Show me the batch API examples" → `search_docs { query: "batch api", depth: "full" }`
+
+The catalogue comes from Drizzle's own `llms.txt` and `llms-full.txt`, so it
+tracks the real docs structure instead of scraping a sidebar and guessing.
 
 ## Connect
 
@@ -103,7 +137,7 @@ The same server can listen on a port. Set `MCP_TRANSPORT=http` (or pass
 ```bash
 docker build -t drizzle-docs-mcp .
 docker run --rm -p 3000:3000 drizzle-docs-mcp
-curl http://localhost:3000/        # {"name":"drizzle-docs-mcp","version":"3.0.0",…}
+curl http://localhost:3000/        # {"name":"drizzle-docs-mcp","version":"…",…}
 ```
 
 Without Docker:
@@ -124,38 +158,13 @@ Then point a client at it:
 ```
 
 Runs on Node 22+ or Bun, so any container platform, VM or PaaS works —
-`tmcp` speaks plain Web `Request`/`Response`, which is why the same code serves
-stdio locally and HTTP remotely.
+[`tmcp`](https://tmcp.io) speaks plain Web `Request`/`Response`, which is why
+the same code serves stdio locally and HTTP remotely.
 
 > [!NOTE]
 > v2 ran on Mastra Cloud (`drizzle.mastra.cloud`). That endpoint is retired —
 > use `npx` for local use, or self-host for a shared URL. See
 > [CHANGELOG.md](CHANGELOG.md).
-
-## Tools
-
-| Tool          | What it does                                                                                   | Arguments                                                                                |
-| ------------- | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `list_topics` | Browse the catalogue. No arguments returns the map: every dialect, every section, page counts. | `dialect`, `section`, `limit` (60), `offset`                                             |
-| `search_docs` | Find a page, or the answer inside the pages.                                                   | `query`, `depth` (`index` \| `full`), `dialect`, `section`, `limit` (10)                 |
-| `fetch_page`  | Read one page as clean Markdown (nav, sidebars and footers stripped).                          | `slug`, `sections`, `maxLength`, `format` (`markdown` \| `json` \| `plaintext`), `fresh` |
-
-- **`depth: "index"`** (default) fuzzy-searches titles, slugs and sections
-  straight from `llms.txt` — instant, and it tolerates typos (`migraton`
-  finds _Migrations_).
-- **`depth: "full"`** downloads `llms-full.txt` once (a few MB) and searches
-  the actual page text, returning a `snippet` around each match. Use it when
-  you need the answer, not a link.
-- Slugs look like `docs/pg/select`. Some catalogue links point at pages the
-  site serves without the dialect segment (`/docs/pg/overview` →
-  `/docs/overview`) — `fetch_page` retries the unprefixed URL and repairs the
-  catalogue, so you never have to care.
-
-Ask your assistant things like:
-
-- "How do I set up a Postgres schema in Drizzle?"
-- "Which migration pages exist for SQLite?"
-- "Show me the batch API examples" → `search_docs { query: "batch api", depth: "full" }`
 
 ## Skills
 
@@ -247,96 +256,17 @@ bun run build        # emit dist/ (this is what npm ships)
 
 ## Publishing a release
 
-One push of a version tag runs `.github/workflows/release.yml`, which
-typechecks, tests, builds, then publishes to npm and cuts a GitHub release:
+Bump `version` in `package.json`, then push a matching tag. The workflow
+typechecks, tests, builds, publishes to npm and cuts a GitHub release:
 
 ```bash
-# 1. bump "version" in package.json
-bun run build        # sanity check locally
-git commit -am "chore: release vX.Y.Z"
+bun version patch        # 3.0.1 -> 3.0.2
+git commit -am "chore: release"
 git tag vX.Y.Z && git push origin vX.Y.Z
 ```
 
-The workflow refuses to publish if the tag does not match `package.json`, and
-`prepublishOnly` re-runs `check` + `test` + `build` before `npm publish`.
-
-### npm provenance
-
-Every release from `3.0.1` on ships with a [provenance
-attestation](https://docs.npmjs.com/generating-provenance-statements/): the
-tarball is tied to this public repository through GitHub's OIDC identity and
-signed by Sigstore, so anyone can check where it was built. **No npm token is
-involved at any point.**
-
-The workflow does its half — `permissions: id-token: write` on the publish job,
-a GitHub-hosted runner, `npm publish --provenance --access public` — and
-`package.json` carries the matching public `repository` field, which npm checks
-case-sensitively.
-
-#### Why there is a step that deletes a token
-
-`actions/setup-node` with `registry-url` writes
-`//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}` into the runner's
-`.npmrc`. Trusted publishing deliberately has no `NODE_AUTH_TOKEN`, so that
-placeholder expands to an empty string — and npm reads an empty token as *auth
-is configured*, which stops it from starting the OIDC exchange. The publish
-then fails with `ENEEDAUTH` even though the trusted publisher is set up
-perfectly. The `Drop the placeholder token` step deletes the line so OIDC can
-take over. Leave it in; removing it looks like a cleanup but breaks releases.
-
-#### 1. First publish — a login, not a token
-
-`3.0.0` was published by hand, because npm refuses to trust a workflow for a
-package that does not exist yet (`npm trust`: *"Package must exist"*):
-
-```bash
-npm login                 # browser + 2FA: a session, not a token
-npm publish --access public   # prepublishOnly runs check + test + build
-npm logout                # leave no credential on disk
-```
-
-That one version carries **no provenance** — attestations can only be minted in
-CI, and CI cannot be trusted for a package that does not exist yet.
-
-#### 2. Trust the workflow (still no token)
-
-```bash
-npm trust github drizzle-docs-mcp \
-  --file release.yml \
-  --repo Michael-Obele/drizzle-docs \
-  --allow-publish
-```
-
-Needs npm ≥ 11.15, 2FA on the account and write access to the package; tokens
-with *bypass 2FA* are deliberately not accepted here. The same setting lives on
-the website: Packages → `drizzle-docs-mcp` → Settings → **Trusted Publisher** →
-GitHub Actions → `Michael-Obele` / `drizzle-docs` / `release.yml`. If you use the
-website, tick **`npm publish`** — new connections default to `npm stage publish`
-only, which this workflow does not use.
-
-#### 3. Lock it down
-
-Settings → **Publishing access** → *Require two-factor authentication and
-disallow tokens*. Only the trusted publisher can publish after that.
-
-#### 4. Release
-
-```bash
-bun version patch         # 3.0.1 -> 3.0.2
-git tag vX.Y.Z && git push origin vX.Y.Z
-```
-
-npm authenticates the job through OIDC and generates the provenance attestation
-by itself.
-
-Check a published version:
-
-```bash
-npm view drizzle-docs-mcp dist.attestations   # Sigstore attestation link
-npm audit signatures                          # verify attestations locally
-```
-
-The package page on npmjs.com shows the provenance badge.
+It refuses to publish if the tag does not match `package.json`, and
+`prepublishOnly` re-runs `check` + `test` + `build` first.
 
 ## Architecture
 
